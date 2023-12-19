@@ -14,6 +14,7 @@
         <h1>{{ post.title }}</h1>
         <h3>{{ post.author }}</h3>
         <p>{{ post.text|linebreaksbr }}</p>
+        <video src="{{ post.video_pc.url }}" poster="{{ post.image.url }}" controls></video>
     </div>
     <hr>
     <a class="btn btn-default" href="{% url 'add_comment_to_post' pk=post.pk %}">Add comment</a>

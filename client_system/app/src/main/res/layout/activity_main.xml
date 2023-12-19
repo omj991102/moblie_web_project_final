@@ -22,8 +22,8 @@
         android:layout_width="150dp"
         android:layout_height="50dp"
         android:layout_marginTop="30dp"
-        android:onClick="onClickForLoadMine"
-        android:text="내 사진"
+        android:onClick="onClickForLoadOne"
+        android:text="누군가의 사진"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -32,6 +32,7 @@
         android:layout_width="0dp"
         android:layout_height="300dp"
         android:layout_marginTop="100dp"
+        android:onClick="toVideo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_all" />
@@ -55,6 +56,27 @@
         android:text="→"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/imgView" />
+
+    <EditText
+        android:id="@+id/editText"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:inputType="textPersonName"
+        android:hint="누구의 사진을 보고 싶나요?"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@id/imgView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:text="게시자"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgView" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

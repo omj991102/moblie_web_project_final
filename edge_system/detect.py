@@ -35,6 +35,10 @@ import platform
 import sys
 from pathlib import Path
 
+import cv2
+import pathlib
+from datetime import datetime
+
 import torch
 
 FILE = Path(__file__).resolve()
@@ -53,6 +57,11 @@ from utils.torch_utils import select_device, smart_inference_mode
 
 from changedetection import ChangeDetection                                                                                 #추가
 
+tol = -1
+result_prev = [0]*80
+image_path = ""
+video_path = ""
+video_convert_path = ""
 
 @smart_inference_mode()
 def run(
@@ -183,6 +192,8 @@ def run(
                 for *xyxy, conf, cls in reversed(det):
                     detected[int(cls)] = 1                                                                              #추가
                     c = int(cls)  # integer class
+                    if c != 14:                                                                                         #추가
+                        continue                                                                                        #추가
                     label = names[c] if hide_conf else f'{names[c]}'
                     confidence = float(conf)
                     confidence_str = f'{confidence:.2f}'
@@ -203,8 +214,42 @@ def run(
                     if save_crop:
                         save_one_box(xyxy, imc, file=save_dir / 'crops' / names[c] / f'{p.stem}.jpg', BGR=True)
 
-            # Stream results
-            cd.add(detected, save_dir, im0)                                                                         #추가
+            # Stream results                                                                          
+            #추가
+            global tol, result_prev
+            if detected[14]==1:
+                if result_prev[14]==0 and tol <= -1:
+                    global image_path, video_path, video_convert_path
+                    image_path = ""
+                    video_path = ""
+
+                    today = datetime.now()
+                    save_directory= os.getcwd() / save_dir / 'detected' / str(today.year) / str(today.month) / str(today.day)
+                    pathlib.Path(save_directory).mkdir(parents=True, exist_ok=True)
+                    
+                    image_path = save_directory / '{0}-{1}-{2}-{3}.jpg'.format(today.hour,today.minute,today.second,today.microsecond)
+                    video_path = save_directory / '{0}-{1}-{2}-{3}.mp4'.format(today.hour,today.minute,today.second,today.microsecond)
+                    video_convert_path = save_directory / '{0}-{1}-{2}-{3}_1.mp4'.format(today.hour,today.minute,today.second,today.microsecond)
+                    fps, w, h = 10, im0.shape[1], im0.shape[0]
+                    vid_record = cv2.VideoWriter(str(video_path), cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
+                    cv2.imwrite(image_path, im0)
+                tol = 20
+                vid_record.write(im0)
+            else:
+                tol -= 1
+                if tol <= -1:
+                    tol = -1
+                elif tol == 0:
+                    vid_record.release()
+                    os.system(f"ffmpeg -i {video_path} -vcodec libx264 {video_convert_path}")
+                    cd.send(image_path, video_convert_path)
+                else:
+                    vid_record.write(im0)
+
+            result_prev = detected[:]
+            #추가
+
+
             im0 = annotator.result()
             if view_img:
                 if platform.system() == 'Linux' and p not in windows:
